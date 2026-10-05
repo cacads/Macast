@@ -25,7 +25,7 @@ if os.name == 'nt':
     from multiprocessing.connection import PipeConnection
 
 logger = logging.getLogger("MPVRenderer")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 class ObserveProperty(Enum):
@@ -101,13 +101,15 @@ class MPVRenderer(Renderer):
     def set_media_url(self, url, start="0"):
         """ data : string
         """
-        options = {'start': start}
+        logger.info("set_media_url: %s", url)
         player_size = Setting.get(SettingProperty.PlayerSize,
                                   default=SettingProperty.PlayerSize_Normal.value)
+        result = self.send_command(['loadfile', url, 'replace'])
+        logger.info("set_media_url result: %s", result)
         if player_size == SettingProperty.PlayerSize_FullScreen.value:
-            options['fullscreen'] = 'yes'
-        self.send_command(['loadfile', url, 'replace',
-                           ','.join([f'{i}={options[i]}' for i in options])])
+            self.send_command(['set_property', 'fullscreen', True])
+        if start and start != "0":
+            self.send_command(['seek', start, 'absolute'])
 
     def set_media_title(self, data):
         """ data : string

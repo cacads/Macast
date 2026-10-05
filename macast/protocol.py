@@ -1031,7 +1031,10 @@ class DLNAHandler(Handler):
             CALLBACK = cherrypy.request.headers.get('CALLBACK')
             TIMEOUT = cherrypy.request.headers.get('TIMEOUT')
             TIMEOUT = TIMEOUT if TIMEOUT is not None else 'Second-1800'
-            TIMEOUT = int(TIMEOUT.split('-')[-1])
+            try:
+                TIMEOUT = int(TIMEOUT.split('-')[-1])
+            except ValueError:
+                TIMEOUT = 1800
             if SID:
                 logger.error("RENEW SUBSCRIBE:!!!!!!!" + service)
                 res = self.protocol.renew_subscribe(SID, TIMEOUT)
